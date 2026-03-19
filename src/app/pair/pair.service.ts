@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PairEntity } from './entities/pair.entity';
 import { FindOptionsOrder, ILike, Repository } from 'typeorm';
@@ -70,6 +70,27 @@ export class PairService {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             const errorStack = error instanceof Error ? error.stack : undefined;
             this.logger.error(`Error fetching pairs: ${errorMessage}`, context, errorStack);
+            throw error;
+        }
+    }
+
+    async findOne(id: string): Promise<PairResponseDto> {
+        const context = `${PairService.name}.findOne`;
+        try {
+            const pair = await this.pairRepository.findOne({
+                where: { id },
+            });
+
+            if (!pair) {
+                this.logger.warn(`Pair with id ${id} not found`, context);
+                throw new NotFoundException(`Pair with id ${id} not found`);
+            }
+
+            return mapToDto(PairResponseDto, pair);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorStack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Error fetching pair: ${errorMessage}`, context, errorStack);
             throw error;
         }
     }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { PairService } from './pair.service';
 import { PairDto } from './dto/req/pair-request.dto';
 import { BaseResponseDto } from 'src/shared/dto/base-response.dto';
@@ -72,6 +72,27 @@ export class PairController {
             message: 'Pairs fetched successfully',
             data: result.data,
             meta: result.meta,
+        };
+    }
+
+    @Get(':id')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Find pair by id',
+        description: 'Find pair by id',
+        auth: true,
+        response: PairResponseDto,
+        status: HttpStatus.OK,
+        produces: 'application/json',
+    })
+    async findOne(@Param('id') id: string): Promise<BaseResponseDto<PairResponseDto>> {
+        const result = await this.pairService.findOne(id);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Pair fetched successfully',
+            data: result,
         };
     }
 }
