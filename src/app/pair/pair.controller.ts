@@ -6,7 +6,7 @@ import { PairResponseDto } from './dto/res/pair-response.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ApiDocGenericResponse } from 'src/common/decorators/api-doc.decorator';
-import { PaginationQueryDto } from 'src/shared/dto/pagination.dto';
+import { PaginationMetaDto, PaginationQueryDto } from 'src/shared/dto/pagination.dto';
 
 @ApiTags('Pair')
 @UseGuards(JwtAuthGuard)
@@ -54,10 +54,12 @@ export class PairController {
     @Get()
     @HttpCode(HttpStatus.OK)
     @ApiDocGenericResponse({
-        summary: 'Get all pairs',
-        description: 'Get all pairs',
+        summary: 'Find all pairs',
+        description: 'Find all pairs',
         auth: true,
         response: PairResponseDto,
+        isArray: true,
+        meta: PaginationMetaDto,
         status: HttpStatus.OK,
         produces: 'application/json',
     })

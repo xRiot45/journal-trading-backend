@@ -4,20 +4,20 @@ import { PaginationMetaDto } from './pagination.dto';
 
 export class BaseResponseDto<T = void> {
     @Expose()
-    @ApiProperty({ example: true })
+    @ApiProperty({ example: true, description: 'Success status' })
     success: boolean;
 
     @Expose()
-    @ApiProperty({ example: 201 })
+    @ApiProperty({ example: 200, description: 'HTTP status code' })
     statusCode: number;
 
     @Expose()
-    @ApiProperty({ example: 'Sample Messages!' })
+    @ApiProperty({ example: 'Sample Messages!', description: 'Error message' })
     message?: string;
 
     @Expose()
     @Type(() => Date)
-    @ApiProperty({ example: new Date().toISOString() })
+    @ApiProperty({ example: new Date().toISOString(), description: 'Timestamp' })
     timestamp: Date;
 
     @Expose()

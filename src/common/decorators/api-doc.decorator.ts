@@ -18,6 +18,7 @@ import {
     ApiResponseOptions,
     getSchemaPath,
 } from '@nestjs/swagger';
+import { ReferenceObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { BaseResponseDto } from 'src/shared/dto/base-response.dto';
 
 export interface ApiDocErrorResponse {
@@ -48,6 +49,7 @@ export interface ApiDocOptions {
     response?: Type<unknown> | Function | [Function] | string; // Return DTO
     isArray?: boolean; // Set true if the return is Array[]
     status?: HttpStatus; // Default 200 (OK) or 201 (Created)
+    meta?: Type<unknown>;
 
     // Error Handling
     // Optional: If you want to override the default error message or add another error status (e.g. 404)
@@ -69,6 +71,7 @@ export function ApiDocGenericResponse(options: ApiDocOptions): MethodDecorator {
         response,
         isArray = false,
         status = HttpStatus.OK,
+        meta,
         customResponses = [],
     } = options;
 
@@ -118,28 +121,33 @@ export function ApiDocGenericResponse(options: ApiDocOptions): MethodDecorator {
 
     // 6. Success Response
     if (response) {
-        decorators.push(ApiExtraModels(BaseResponseDto, response as Type<unknown>));
+        const extraModels = meta
+            ? [BaseResponseDto, response as Type<unknown>, meta]
+            : [BaseResponseDto, response as Type<unknown>];
+
+        decorators.push(ApiExtraModels(...extraModels));
+
+        // ✅ Bangun dataSchema
+        const dataSchema = isArray
+            ? { type: 'array', items: { $ref: getSchemaPath(response as Type<unknown>) } }
+            : { $ref: getSchemaPath(response as Type<unknown>) };
+
+        // ✅ Bangun properties secara explicit
+        const properties: Record<string, SchemaObject | ReferenceObject> = {
+            data: dataSchema,
+        };
+
+        // ✅ Inject meta hanya jika ada
+        if (meta) {
+            properties['meta'] = { $ref: getSchemaPath(meta) };
+        }
 
         decorators.push(
             ApiResponse({
                 status: status,
                 description: 'Operation successful',
                 schema: {
-                    allOf: [
-                        { $ref: getSchemaPath(BaseResponseDto) },
-                        {
-                            properties: {
-                                data: isArray
-                                    ? {
-                                          type: 'array',
-                                          items: { $ref: getSchemaPath(response as Type<unknown>) },
-                                      }
-                                    : {
-                                          $ref: getSchemaPath(response as Type<unknown>),
-                                      },
-                            },
-                        },
-                    ],
+                    allOf: [{ $ref: getSchemaPath(BaseResponseDto) }, { properties }],
                 },
             }),
         );
