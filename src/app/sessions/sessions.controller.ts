@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { ApiTags } from '@nestjs/swagger';
 import { SessionDto } from './dto/req/session-request.dto';
@@ -91,6 +103,7 @@ export class SessionsController {
         response: SessionResponseDto,
         status: HttpStatus.OK,
         produces: 'application/json',
+        consumes: 'application/json',
     })
     async update(
         @Param('sessionId') sessionId: string,
@@ -103,6 +116,26 @@ export class SessionsController {
             timestamp: new Date(),
             message: 'Session updated successfully',
             data: result,
+        };
+    }
+
+    @Delete(':sessionId')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Delete a Session by ID',
+        description: 'Delete a Session by ID',
+        auth: true,
+        response: BaseResponseDto,
+        status: HttpStatus.OK,
+        produces: 'application/json',
+    })
+    async remove(@Param('sessionId') sessionId: string): Promise<BaseResponseDto> {
+        await this.sessionsService.remove(sessionId);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Session deleted successfully',
         };
     }
 }

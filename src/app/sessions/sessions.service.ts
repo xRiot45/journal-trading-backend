@@ -144,4 +144,25 @@ export class SessionsService {
             throw error;
         }
     }
+
+    async remove(sessionId: string): Promise<void> {
+        const context = `${SessionsService.name}.remove`;
+        try {
+            const session = await this.sessionRepository.findOne({
+                where: { id: sessionId },
+            });
+
+            if (!session) {
+                this.logger.warn(`Session with id ${sessionId} not found`, context);
+                throw new NotFoundException(`Session with id ${sessionId} not found`);
+            }
+
+            await this.sessionRepository.remove(session);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorStack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Error deleting session: ${errorMessage}`, context, errorStack);
+            throw error;
+        }
+    }
 }
