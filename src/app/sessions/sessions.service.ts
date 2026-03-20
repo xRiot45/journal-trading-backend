@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SessionEntity } from './entities/session.entity';
 import { FindOptionsOrder, ILike, Repository } from 'typeorm';
@@ -83,6 +83,28 @@ export class SessionsService {
             const errorStack = error instanceof Error ? error.stack : undefined;
 
             this.logger.error(`Error fetching sessions: ${errorMessage}`, context, errorStack);
+            throw error;
+        }
+    }
+
+    async findOne(sessionId: string): Promise<SessionResponseDto> {
+        const context = `${SessionsService.name}.findOne`;
+
+        try {
+            const session = await this.sessionRepository.findOne({
+                where: { id: sessionId },
+            });
+
+            if (!session) {
+                this.logger.warn(`Session with id ${sessionId} not found`, context);
+                throw new NotFoundException(`Session with id ${sessionId} not found`);
+            }
+
+            return mapToDto(SessionResponseDto, session);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorStack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Error fetching session: ${errorMessage}`, context, errorStack);
             throw error;
         }
     }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { ApiTags } from '@nestjs/swagger';
 import { SessionDto } from './dto/req/session-request.dto';
@@ -25,24 +25,6 @@ export class SessionsController {
         status: HttpStatus.CREATED,
         consumes: 'application/json',
         produces: 'application/json',
-        customResponses: [
-            {
-                status: HttpStatus.BAD_REQUEST,
-                description: 'Bad Request',
-            },
-            {
-                status: HttpStatus.CONFLICT,
-                description: 'Conflict: Session name already exists',
-            },
-            {
-                status: HttpStatus.UNAUTHORIZED,
-                description: 'Unauthorized',
-            },
-            {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                description: 'Internal Server Error',
-            },
-        ],
     })
     async create(@Body() dto: SessionDto): Promise<BaseResponseDto<SessionResponseDto>> {
         const result = await this.sessionsService.create(dto);
@@ -66,16 +48,6 @@ export class SessionsController {
         status: HttpStatus.OK,
         meta: PaginationMetaDto,
         produces: 'application/json',
-        customResponses: [
-            {
-                status: HttpStatus.UNAUTHORIZED,
-                description: 'Unauthorized',
-            },
-            {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                description: 'Internal Server Error',
-            },
-        ],
     })
     async findAll(@Query() query: PaginationQueryDto): Promise<BaseResponseDto<SessionResponseDto[]>> {
         const result = await this.sessionsService.findAll(query);
@@ -86,6 +58,27 @@ export class SessionsController {
             message: 'Sessions fetched successfully',
             data: result.data,
             meta: result.meta,
+        };
+    }
+
+    @Get(':sessionId')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Get a Session by ID',
+        description: 'Get a Session by ID',
+        auth: true,
+        response: SessionResponseDto,
+        status: HttpStatus.OK,
+        produces: 'application/json',
+    })
+    async findOne(@Param('sessionId') sessionId: string): Promise<BaseResponseDto<SessionResponseDto>> {
+        const result = await this.sessionsService.findOne(sessionId);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Session fetched successfully',
+            data: result,
         };
     }
 }
