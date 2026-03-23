@@ -1,5 +1,4 @@
 import { AssetEntity } from 'src/app/assets/entities/asset.entity';
-import { DocumentEntity } from 'src/app/documents/entities/document.entity';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
@@ -45,10 +44,6 @@ export class UserEntity {
 
     @UpdateDateColumn({ name: 'updatedAt' })
     updatedAt: Date;
-
-    // Relations
-    @OneToMany(() => DocumentEntity, d => d.user)
-    documents: DocumentEntity[];
 
     @OneToMany(() => AssetEntity, a => a.user)
     assets: AssetEntity[];
