@@ -18,7 +18,7 @@ export class DocumentEntity extends BaseEntity {
         type: 'longtext',
         nullable: true,
     })
-    content: string;
+    content?: string | null;
 
     @Column({
         type: 'varchar',
