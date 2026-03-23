@@ -21,6 +21,13 @@ export class DocumentEntity extends BaseEntity {
     content: string;
 
     @Column({
+        type: 'varchar',
+        length: 250,
+        nullable: true,
+    })
+    description?: string;
+
+    @Column({
         type: 'boolean',
         default: false,
     })
