@@ -20,9 +20,9 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ApiDocGenericResponse } from 'src/common/decorators/api-doc.decorator';
 import { PaginationMetaDto, PaginationQueryDto } from 'src/shared/dto/pagination.dto';
 
-@ApiTags('Pair')
+@ApiTags('Pairs')
 @UseGuards(JwtAuthGuard)
-@Controller('pair')
+@Controller('pairs')
 export class PairController {
     constructor(private readonly pairsService: PairsService) {}
 
