@@ -6,10 +6,16 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { DatabaseModule } from './core/database/database.module';
 import { LoggerModule } from './core/logger/logger.module';
 import { AppModule } from './app/app.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Global()
 @Module({
     imports: [
+        ServeStaticModule.forRoot({
+            rootPath: join(process.cwd(), 'public'),
+            serveRoot: '/',
+        }),
         ConfigModule.forRoot({
             isGlobal: true,
         }),

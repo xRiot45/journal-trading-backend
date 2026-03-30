@@ -14,14 +14,25 @@ export class TradingPlanEntity extends BaseEntity {
     @Column({
         type: 'date',
         nullable: false,
+        transformer: {
+            to: (value: string) => value,
+            from: (value: string) => value,
+        },
     })
-    date: Date;
+    date: string;
 
     @Column({
         type: 'text',
         nullable: false,
     })
     description: string;
+
+    @Column({
+        type: 'varchar',
+        length: 255,
+        nullable: false,
+    })
+    thumbnailUrl: string;
 
     @Column()
     pairId: string;
