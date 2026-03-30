@@ -1,5 +1,6 @@
+import { TradingPlanEntity } from 'src/app/trading-plans/entities/trading-plan.entity';
 import { BaseEntity } from 'src/shared/entities/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity('pairs')
 export class PairEntity extends BaseEntity {
@@ -17,4 +18,9 @@ export class PairEntity extends BaseEntity {
         nullable: true,
     })
     description?: string;
+
+    // ---- Relations ----
+
+    @OneToMany(() => TradingPlanEntity, tradingPlan => tradingPlan.pair)
+    tradingPlans: TradingPlanEntity[];
 }
