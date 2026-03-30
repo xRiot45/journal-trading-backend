@@ -25,4 +25,10 @@ export class SessionDto {
         message: 'endTime must be in HH:mm:ss (WIB) format',
     })
     endTime: string;
+
+    @ApiProperty({ example: 'Session for London market', description: 'A brief description of the session' })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(255)
+    description: string;
 }

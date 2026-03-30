@@ -21,7 +21,7 @@ export class SessionsService {
 
     async create(dto: SessionDto): Promise<SessionResponseDto> {
         const context = `${SessionsService.name}.create`;
-        const { name, startTime, endTime } = dto;
+        const { name, startTime, endTime, description } = dto;
 
         try {
             if (startTime === endTime) {
@@ -41,6 +41,7 @@ export class SessionsService {
                 name,
                 startTime,
                 endTime,
+                description,
             });
 
             const result = await this.sessionRepository.save(session);
@@ -122,7 +123,9 @@ export class SessionsService {
             }
 
             const existingSession = await this.sessionRepository.findOne({
-                where: { name: dto.name },
+                where: {
+                    name: dto.name,
+                },
             });
 
             if (existingSession && existingSession.id !== sessionId) {
@@ -133,6 +136,7 @@ export class SessionsService {
             session.name = dto.name;
             session.startTime = dto.startTime;
             session.endTime = dto.endTime;
+            session.description = dto.description;
 
             const result = await this.sessionRepository.save(session);
 

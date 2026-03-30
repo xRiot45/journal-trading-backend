@@ -19,4 +19,10 @@ export class SessionEntity extends BaseEntity {
         type: 'time',
     })
     endTime: string;
+
+    @Column({
+        type: 'varchar',
+        length: 255,
+    })
+    description: string;
 }

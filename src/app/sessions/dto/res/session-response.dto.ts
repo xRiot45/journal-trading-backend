@@ -18,6 +18,10 @@ export class SessionResponseDto {
     @Expose()
     endTime: string;
 
+    @ApiProperty({ example: 'Session for London market', description: 'A brief description of the session' })
+    @Expose()
+    description: string;
+
     @ApiProperty({ example: '2023-08-01T00:00:00.000Z', description: 'The creation date of the session' })
     @Expose()
     createdAt: Date;
