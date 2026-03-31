@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
 import * as fs from 'fs';
@@ -5,7 +6,9 @@ import { diskStorage, StorageEngine } from 'multer';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export const BASE_UPLOAD_PATH = process.env.UPLOAD_DESTINATION || path.join(process.cwd(), 'public', 'uploads');
+export const BASE_UPLOAD_PATH = path.resolve(
+    process.env.UPLOAD_DESTINATION || path.join(process.cwd(), 'public', 'uploads'),
+);
 
 const DEFAULT_ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -69,13 +72,13 @@ export const deleteFile = async (filePath: string | null | undefined): Promise<v
     if (!filePath) return;
 
     try {
-        const cleanPath = filePath.replace(/^.*public\/uploads\//, '').replace(/^\//, '');
-
+        const cleanPath = filePath.replace(/^\/+/, '').replace(/^uploads\//, '');
         const fullPath = path.join(BASE_UPLOAD_PATH, cleanPath);
 
         if (fs.existsSync(fullPath)) {
             await fs.promises.unlink(fullPath);
-            console.log(`[File Utils] Successfully deleted: ${fullPath}`);
+        } else {
+            console.warn(`[File Utils] File not found: ${fullPath}`);
         }
     } catch (error) {
         console.error(`[File Utils] Failed to delete file at ${filePath}`, error);

@@ -5,6 +5,7 @@ import {
     HttpCode,
     HttpStatus,
     Param,
+    Patch,
     Post,
     UploadedFile,
     UseGuards,
@@ -97,6 +98,42 @@ export class TradingPlansController {
             statusCode: HttpStatus.OK,
             timestamp: new Date(),
             message: 'Trading plan retrieved successfully',
+            data: result,
+        };
+    }
+
+    @Patch(':tradingPlanId')
+    @HttpCode(HttpStatus.OK)
+    @UseInterceptors(
+        FileInterceptor('thumbnail', {
+            storage: createStorageConfig('trading-plans'),
+            fileFilter: fileFilter(['image/jpeg', 'image/png', 'image/webp']),
+            limits: {
+                fileSize: 2 * 1024 * 1024, // 2MB
+            },
+        }),
+    )
+    @ApiDocGenericResponse({
+        summary: 'Update a trading plan',
+        description: 'Update an existing trading plan by its ID',
+        auth: true,
+        body: TradingPlanRequestDto,
+        response: TradingPlanResponseDto,
+        status: HttpStatus.OK,
+        consumes: 'multipart/form-data',
+        produces: 'application/json',
+    })
+    async update(
+        @Param('tradingPlanId') tradingPlanId: string,
+        @Body() dto: TradingPlanRequestDto,
+        @UploadedFile() file?: Express.Multer.File,
+    ): Promise<BaseResponseDto<TradingPlanResponseDto>> {
+        const result = await this.tradingPlansService.update(tradingPlanId, dto, file);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Trading plan updated successfully',
             data: result,
         };
     }

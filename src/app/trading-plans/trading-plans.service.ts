@@ -111,4 +111,75 @@ export class TradingPlansService {
             throw new InternalServerErrorException('Failed to retrieve trading plan');
         }
     }
+
+    async update(
+        tradingPlanId: string,
+        dto: TradingPlanRequestDto,
+        file?: Express.Multer.File,
+    ): Promise<TradingPlanResponseDto> {
+        const context = `${TradingPlansService.name}.update`;
+
+        let newFilePath: string | null = null;
+        let oldFilePath: string | null = null;
+
+        try {
+            const tradingPlan = await this.tradingPlanRepository.findOne({
+                where: { id: tradingPlanId },
+                relations: ['pair'],
+            });
+
+            if (!tradingPlan) {
+                this.logger.warn(`Trading plan with id ${tradingPlanId} not found`, context);
+                throw new NotFoundException(`Trading plan with id ${tradingPlanId} not found`);
+            }
+
+            const pair = await this.pairRepository.findOne({
+                where: { id: dto.pairId },
+            });
+
+            if (!pair) {
+                this.logger.warn(`Pair with id ${dto.pairId} not found`, context);
+                throw new NotFoundException(`Pair with id ${dto.pairId} not found`);
+            }
+
+            if (file && !file.path) {
+                this.logger.warn('File upload failed', context);
+                throw new BadRequestException('File upload failed');
+            }
+
+            oldFilePath = tradingPlan.thumbnailUrl ?? null;
+
+            if (file) {
+                newFilePath = normalizeFilePath(file.path);
+            }
+
+            tradingPlan.title = dto.title;
+            tradingPlan.date = new Date(dto.date).toISOString().split('T')[0];
+            tradingPlan.description = dto.description;
+            tradingPlan.pairId = pair.id;
+
+            if (newFilePath) {
+                tradingPlan.thumbnailUrl = newFilePath;
+            }
+
+            const result = await this.tradingPlanRepository.save(tradingPlan);
+
+            if (newFilePath && oldFilePath) {
+                await deleteFile(oldFilePath);
+            }
+
+            return mapToDto(TradingPlanResponseDto, result);
+        } catch (error) {
+            if (newFilePath) {
+                await deleteFile(newFilePath);
+            }
+
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorStack = error instanceof Error ? error.stack : undefined;
+
+            this.logger.error(`Error updating trading plan: ${errorMessage}`, context, errorStack);
+
+            throw new InternalServerErrorException('Failed to update trading plan');
+        }
+    }
 }
