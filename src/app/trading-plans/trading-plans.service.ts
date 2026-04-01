@@ -156,7 +156,7 @@ export class TradingPlansService {
             tradingPlan.title = dto.title;
             tradingPlan.date = new Date(dto.date).toISOString().split('T')[0];
             tradingPlan.description = dto.description;
-            tradingPlan.pairId = pair.id;
+            tradingPlan.pair = pair;
 
             if (newFilePath) {
                 tradingPlan.thumbnailUrl = newFilePath;
