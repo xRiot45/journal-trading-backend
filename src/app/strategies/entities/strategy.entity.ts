@@ -3,7 +3,7 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { ElementEntity } from 'src/app/elements/entities/element.entity';
 
 @Entity('documents')
-export class DocumentEntity extends BaseEntity {
+export class StrategyEntity extends BaseEntity {
     @Column({
         type: 'varchar',
         length: 100,
@@ -11,8 +11,6 @@ export class DocumentEntity extends BaseEntity {
     })
     title: string;
 
-    // Full canvas state mind map tersimpan sebagai JSON string
-    // null = dokumen baru / blank canvas
     @Column({
         type: 'longtext',
         nullable: true,
@@ -27,17 +25,11 @@ export class DocumentEntity extends BaseEntity {
     description?: string;
 
     @Column({
-        type: 'boolean',
-        default: false,
-    })
-    isStarred: boolean;
-
-    @Column({
         type: 'date',
         nullable: true,
     })
     lastEditedAt: Date;
 
-    @OneToMany(() => ElementEntity, e => e.document)
+    @OneToMany(() => ElementEntity, e => e.strategy)
     elements: ElementEntity[];
 }

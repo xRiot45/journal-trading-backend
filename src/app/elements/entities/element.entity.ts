@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from 'src/shared/entities/base.entity';
-import { DocumentEntity } from 'src/app/documents/entities/document.entity';
+import { StrategyEntity } from 'src/app/strategies/entities/strategy.entity';
 
 export enum ElementType {
     NODE = 'node', // node mind map
@@ -49,9 +49,9 @@ export class ElementEntity extends BaseEntity {
     isVisible: boolean;
 
     // Relations
-    @ManyToOne(() => DocumentEntity, d => d.elements, { onDelete: 'CASCADE' })
+    @ManyToOne(() => StrategyEntity, d => d.elements, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'document_id' })
-    document: DocumentEntity;
+    strategy: StrategyEntity;
 
     @ManyToOne(() => ElementEntity, e => e.children, { nullable: true })
     @JoinColumn({ name: 'parent_element_id' })

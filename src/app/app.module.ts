@@ -3,9 +3,9 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PairsModule } from './pairs/pairs.module';
 import { SessionsModule } from './sessions/sessions.module';
-import { DocumentsModule } from './documents/documents.module';
 import { ElementsModule } from './elements/elements.module';
 import { TradingPlansModule } from './trading-plans/trading-plans.module';
+import { StrategiesModule } from './strategies/strategies.module';
 
 @Module({
     imports: [
@@ -13,7 +13,7 @@ import { TradingPlansModule } from './trading-plans/trading-plans.module';
         AuthModule,
         PairsModule,
         SessionsModule,
-        DocumentsModule,
+        StrategiesModule,
         ElementsModule,
         TradingPlansModule,
     ],
