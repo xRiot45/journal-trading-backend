@@ -1,7 +1,6 @@
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 import { ElementEntity } from 'src/app/elements/entities/element.entity';
-import { CommentEntity } from 'src/app/comments/entities/comment.entity';
 
 @Entity('documents')
 export class DocumentEntity extends BaseEntity {
@@ -41,7 +40,4 @@ export class DocumentEntity extends BaseEntity {
 
     @OneToMany(() => ElementEntity, e => e.document)
     elements: ElementEntity[];
-
-    @OneToMany(() => CommentEntity, c => c.document)
-    comments: CommentEntity[];
 }
