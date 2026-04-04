@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
 import { JournalsService } from './journals.service';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -46,6 +58,13 @@ export class JournalsController {
         response: JournalResponseDto,
         status: HttpStatus.OK,
         produces: 'application/json',
+        queries: [
+            { name: 'page', type: 'number', required: false },
+            { name: 'limit', type: 'number', required: false },
+            { name: 'search', type: 'string', required: false },
+            { name: 'sortBy', type: 'string', required: false },
+            { name: 'order', type: 'string', required: false },
+        ],
     })
     async findAll(@Query() query: PaginationQueryDto): Promise<BaseResponseDto<JournalResponseDto[]>> {
         const result = await this.journalsService.findAll(query);
@@ -103,6 +122,27 @@ export class JournalsController {
             timestamp: new Date(),
             message: 'Journal updated successfully',
             data: result,
+        };
+    }
+
+    @Delete(':journalId')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Delete Journal by ID',
+        description: 'Delete Journal by ID',
+        auth: true,
+        response: BaseResponseDto,
+        status: HttpStatus.OK,
+        produces: 'application/json',
+        params: [{ name: 'journalId', type: 'string', required: true }],
+    })
+    async delete(@Param('journalId') journalId: string): Promise<BaseResponseDto> {
+        await this.journalsService.delete(journalId);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Journal deleted successfully',
         };
     }
 }

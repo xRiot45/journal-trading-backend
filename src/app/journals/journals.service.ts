@@ -211,4 +211,27 @@ export class JournalsService {
             throw error;
         }
     }
+
+    async delete(journalId: string): Promise<void> {
+        const context = `${JournalsService.name}.delete`;
+        try {
+            const journal = await this.journalRepository.findOne({
+                where: { id: journalId },
+            });
+
+            if (!journal) {
+                this.logger.warn(`Journal with ID ${journalId} not found`, context);
+                throw new NotFoundException(`Journal with ID ${journalId} not found`);
+            }
+
+            await this.journalRepository.remove(journal);
+
+            this.logger.log(`Journal deleted: ${journalId}`, context);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            const stack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Error deleting journal: ${message}`, context, stack);
+            throw error;
+        }
+    }
 }
