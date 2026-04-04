@@ -75,7 +75,6 @@ export class JournalRequestDto {
         description: 'Closing price of the trade',
         example: 1.24,
         type: Number,
-        nullable: true,
     })
     @IsNumber()
     closingPrice: number;
@@ -84,7 +83,6 @@ export class JournalRequestDto {
         description: 'Time when the trade was closed (HH:mm:ss)',
         example: '10:45:00',
         type: String,
-        nullable: true,
     })
     @IsString()
     closingTime: string;
@@ -94,7 +92,6 @@ export class JournalRequestDto {
         description: 'Take Profit level',
         example: 1.25,
         type: Number,
-        nullable: true,
     })
     @IsNumber()
     takeProfit: number;
@@ -103,7 +100,6 @@ export class JournalRequestDto {
         description: 'Stop Loss level',
         example: 1.23,
         type: Number,
-        nullable: true,
     })
     @IsNumber()
     stopLoss: number;
@@ -113,7 +109,6 @@ export class JournalRequestDto {
         description: 'Profit and Loss value in cent currency format',
         example: 55.0,
         type: Number,
-        nullable: true,
     })
     @IsNumber()
     profitAndLoss: number;
@@ -123,7 +118,6 @@ export class JournalRequestDto {
         description: 'Risk ratio of the trade',
         example: 1.5,
         type: Number,
-        nullable: true,
     })
     @IsNumber()
     riskRatio: number;
@@ -132,7 +126,6 @@ export class JournalRequestDto {
         description: 'Reward ratio of the trade',
         example: 2.5,
         type: Number,
-        nullable: true,
     })
     @IsNumber()
     rewardRatio: number;
@@ -170,10 +163,9 @@ export class JournalRequestDto {
     @ApiPropertyOptional({
         description: 'Foreign key referencing StrategyEntity',
         example: '550e8400-e29b-41d4-a716-446655440000',
-        nullable: true,
     })
-    @IsOptional()
-    strategyId?: string;
+    @IsNotEmpty()
+    strategyId: string;
 }
 
 export class CreateJournalRequestDto extends JournalRequestDto {}

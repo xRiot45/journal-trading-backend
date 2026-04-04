@@ -1,8 +1,8 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { JournalsService } from './journals.service';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { CreateJournalRequestDto } from './dto/req/journal-request.dto';
+import { CreateJournalRequestDto, UpdateJournalRequestDto } from './dto/req/journal-request.dto';
 import { BaseResponseDto } from 'src/shared/dto/base-response.dto';
 import { JournalResponseDto } from './dto/res/journal-response.dto';
 import { ApiDocGenericResponse } from 'src/common/decorators/api-doc.decorator';
@@ -77,6 +77,31 @@ export class JournalsController {
             statusCode: HttpStatus.OK,
             timestamp: new Date(),
             message: 'Journal fetched successfully',
+            data: result,
+        };
+    }
+
+    @Patch(':journalId')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Update Journal by ID',
+        description: 'Update Journal by ID',
+        auth: true,
+        response: JournalResponseDto,
+        status: HttpStatus.OK,
+        produces: 'application/json',
+        params: [{ name: 'journalId', type: 'string', required: true }],
+    })
+    async update(
+        @Param('journalId') journalId: string,
+        @Body() dto: UpdateJournalRequestDto,
+    ): Promise<BaseResponseDto<JournalResponseDto>> {
+        const result = await this.journalsService.update(journalId, dto);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Journal updated successfully',
             data: result,
         };
     }
