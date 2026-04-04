@@ -2,39 +2,18 @@ import { PairEntity } from 'src/app/pairs/entities/pair.entity';
 import { StrategyEntity } from 'src/app/strategies/entities/strategy.entity';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-
-// ---- Enums ----
-
-export enum TradeDirection {
-    BUY = 'Buy',
-    SELL = 'Sell',
-}
-
-export enum TradeStatus {
-    PROFIT = 'Profit',
-    LOSS = 'Loss',
-    DRAW = 'Draw',
-}
-
-export enum BasedOnPlan {
-    YES = 1,
-    NO = 0,
-}
-
-// ---- Entity ----
+import { TradeDirection } from '../common/enum/trade-direction.enum';
+import { TradeStatus } from '../common/enum/trade-status.enum';
+import { BasedOnPlan } from '../common/enum/based-on-plan.enum';
 
 @Entity('journals')
 export class JournalEntity extends BaseEntity {
-    // ---- Date ----
-
     @Column({
         type: 'date',
         nullable: false,
         comment: 'Trading date',
     })
     date: Date;
-
-    // ---- Direction ----
 
     @Column({
         type: 'enum',
@@ -44,8 +23,6 @@ export class JournalEntity extends BaseEntity {
     })
     direction: TradeDirection;
 
-    // ---- Status ----
-
     @Column({
         type: 'enum',
         enum: TradeStatus,
@@ -54,16 +31,12 @@ export class JournalEntity extends BaseEntity {
     })
     status: TradeStatus;
 
-    // ---- Lot Size ----
-
     @Column({
         type: 'float',
         nullable: false,
         comment: 'Lot size used in this trade',
     })
     lotSize: number;
-
-    // ---- Entry ----
 
     @Column({
         type: 'float',
@@ -79,8 +52,6 @@ export class JournalEntity extends BaseEntity {
     })
     entryTime: string;
 
-    // ---- Closing ----
-
     @Column({
         type: 'float',
         nullable: true,
@@ -95,32 +66,26 @@ export class JournalEntity extends BaseEntity {
     })
     closingTime: string | null;
 
-    // ---- TP & SL ----
-
     @Column({
         type: 'float',
         nullable: true,
         comment: 'Take Profit level',
     })
-    tp: number | null;
+    takeProfit: number | null;
 
     @Column({
         type: 'float',
         nullable: true,
         comment: 'Stop Loss level',
     })
-    sl: number | null;
-
-    // ---- PnL ----
+    stopLoss: number | null;
 
     @Column({
         type: 'float',
         nullable: true,
         comment: 'Profit and Loss value in cent currency format',
     })
-    pnl: number | null;
-
-    // ---- Risk & Reward Ratio ----
+    profitAndLoss: number | null;
 
     @Column({
         type: 'decimal',
@@ -140,8 +105,6 @@ export class JournalEntity extends BaseEntity {
     })
     rewardRatio: number | null;
 
-    // ---- Based on Plan ----
-
     @Column({
         type: 'tinyint',
         width: 1,
@@ -151,8 +114,6 @@ export class JournalEntity extends BaseEntity {
     })
     basedOnPlan: BasedOnPlan;
 
-    // ---- Note ----
-
     @Column({
         type: 'text',
         nullable: true,
@@ -160,25 +121,23 @@ export class JournalEntity extends BaseEntity {
     })
     note: string | null;
 
-    // ---- Relations ----
-
     @Column({
         nullable: false,
         comment: 'Foreign key referencing PairEntity',
     })
-    pairId: number;
+    pairId: string;
 
     @ManyToOne(() => PairEntity, { eager: false, onDelete: 'RESTRICT' })
     @JoinColumn({ name: 'pairId' })
     pair: PairEntity;
 
     @Column({
-        nullable: true,
+        nullable: false,
         comment: 'Foreign key referencing StrategyEntity',
     })
-    strategyId: number | null;
+    strategyId: string;
 
-    @ManyToOne(() => StrategyEntity, { eager: false, nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => StrategyEntity, { eager: false, onDelete: 'RESTRICT' })
     @JoinColumn({ name: 'strategyId' })
-    strategy: StrategyEntity | null;
+    strategy: StrategyEntity;
 }
