@@ -121,4 +121,26 @@ export class JournalsService {
             throw error;
         }
     }
+
+    async findOne(journalId: string): Promise<JournalResponseDto> {
+        const context = `${JournalsService.name}.findOne`;
+        try {
+            const journal = await this.journalRepository.findOne({
+                where: { id: journalId },
+                relations: ['pair', 'strategy'],
+            });
+
+            if (!journal) {
+                this.logger.warn(`Journal with ID ${journalId} not found`, context);
+                throw new NotFoundException(`Journal with ID ${journalId} not found`);
+            }
+
+            return mapToDto(JournalResponseDto, journal);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorStack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Error fetching journal: ${errorMessage}`, context, errorStack);
+            throw error;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JournalsService } from './journals.service';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -56,6 +56,28 @@ export class JournalsController {
             message: 'Journals fetched successfully',
             data: result.data,
             meta: result.meta,
+        };
+    }
+
+    @Get(':journalId')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Get Journal by ID',
+        description: 'Get Journal by ID',
+        auth: true,
+        response: JournalResponseDto,
+        status: HttpStatus.OK,
+        produces: 'application/json',
+        params: [{ name: 'journalId', type: 'string', required: true }],
+    })
+    async findOne(@Param('journalId') journalId: string): Promise<BaseResponseDto<JournalResponseDto>> {
+        const result = await this.journalsService.findOne(journalId);
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message: 'Journal fetched successfully',
+            data: result,
         };
     }
 }
