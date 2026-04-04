@@ -54,56 +54,56 @@ export class JournalEntity extends BaseEntity {
 
     @Column({
         type: 'float',
-        nullable: true,
+        nullable: false,
         comment: 'Closing price of the trade',
     })
-    closingPrice: number | null;
+    closingPrice: number;
 
     @Column({
         type: 'time',
-        nullable: true,
+        nullable: false,
         comment: 'Time when the trade was closed',
     })
-    closingTime: string | null;
+    closingTime: string;
 
     @Column({
         type: 'float',
-        nullable: true,
+        nullable: false,
         comment: 'Take Profit level',
     })
-    takeProfit: number | null;
+    takeProfit: number;
 
     @Column({
         type: 'float',
-        nullable: true,
+        nullable: false,
         comment: 'Stop Loss level',
     })
-    stopLoss: number | null;
+    stopLoss: number;
 
     @Column({
         type: 'float',
-        nullable: true,
+        nullable: false,
         comment: 'Profit and Loss value in cent currency format',
     })
-    profitAndLoss: number | null;
+    profitAndLoss: number;
 
     @Column({
         type: 'decimal',
         precision: 10,
         scale: 2,
-        nullable: true,
+        nullable: false,
         comment: 'Risk ratio of the trade',
     })
-    riskRatio: number | null;
+    riskRatio: number;
 
     @Column({
         type: 'decimal',
         precision: 10,
         scale: 2,
-        nullable: true,
+        nullable: false,
         comment: 'Reward ratio of the trade',
     })
-    rewardRatio: number | null;
+    rewardRatio: number;
 
     @Column({
         type: 'tinyint',
