@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsUUID } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
 import { ElementType } from '../../entities/element.entity';
 
 export class CreateElementDto {
@@ -12,6 +12,10 @@ export class CreateElementDto {
     @IsEnum(ElementType)
     @IsNotEmpty()
     type: ElementType;
+
+    @ApiProperty({ example: 'My Node', description: 'Node title' })
+    @IsNotEmpty()
+    identifier: string;
 
     @ApiPropertyOptional({ example: 0, description: 'X position' })
     @IsNumber()
@@ -37,22 +41,6 @@ export class CreateElementDto {
     @IsNumber()
     @IsOptional()
     zIndex?: number;
-
-    @ApiPropertyOptional({
-        example: { color: '#ffffff', background: '#3b82f6', borderRadius: 8 },
-        description: 'Dynamic styling properties',
-    })
-    @IsObject()
-    @IsOptional()
-    styleData?: Record<string, unknown>;
-
-    @ApiPropertyOptional({
-        description: 'NODE: { label, description } | EDGE: { sourceId, targetId }',
-        example: { label: 'My Node' },
-    })
-    @IsObject()
-    @IsOptional()
-    contentData?: Record<string, unknown>;
 
     @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440001', description: 'Parent node ID' })
     @IsUUID()

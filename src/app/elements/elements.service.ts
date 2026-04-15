@@ -26,42 +26,61 @@ export class ElementsService {
     async createElement(dto: CreateElementDto): Promise<ElementResponseDto> {
         const context = `${ElementsService.name}.createElement`;
 
-        const strategy = await this.strategyRepository.findOne({ where: { id: dto.strategyId } });
-        if (!strategy) throw new NotFoundException(`Strategy (canvas) with id ${dto.strategyId} not found`);
+        // 1. Validasi  Strategy
+        const strategy = await this.strategyRepository.findOne({
+            where: {
+                id: dto.strategyId,
+            },
+        });
 
-        if (dto.type === ElementType.EDGE) {
-            this.validateEdgeContentData(dto.contentData);
-            const { sourceId, targetId } = dto.contentData as { sourceId: string; targetId: string };
-            await this.validateEdgeEndpoints(dto.strategyId, sourceId, targetId);
+        if (!strategy) {
+            throw new NotFoundException(`Strategy (canvas) with id ${dto.strategyId} not found`);
         }
 
+        // 2. Validasi Parent jika ada
         if (dto.parentElementId) {
-            await this.validateParentExists(dto.strategyId, dto.parentElementId);
+            const parent = await this.elementRepository.findOne({
+                where: { id: dto.parentElementId, strategyId: dto.strategyId, type: ElementType.NODE },
+            });
+
+            if (!parent) {
+                throw new BadRequestException(`Parent node ${dto.parentElementId} not found in this canvas`);
+            }
         }
 
-        // Snapshot before create
-        await this.strategiesService.pushSnapshot(dto.strategyId, HistoryActionType.CREATE_ELEMENT, 'Create element');
+        // 3. Snapshot sebelum create (untuk Undo/Redo)
+        await this.strategiesService.pushSnapshot(
+            dto.strategyId,
+            HistoryActionType.CREATE_ELEMENT,
+            `Create element: ${dto.identifier}`,
+        );
 
+        // 4. Mapping DTO ke Entity
         const element = this.elementRepository.create({
             strategyId: dto.strategyId,
+            identifier: dto.identifier,
             type: dto.type,
             x: dto.x ?? 0,
             y: dto.y ?? 0,
             width: dto.width ?? 160,
             height: dto.height ?? 60,
             zIndex: dto.zIndex ?? 0,
-            styleData: dto.styleData ?? null,
-            contentData: dto.contentData ?? null,
             parentElementId: dto.parentElementId ?? null,
             isLocked: dto.isLocked ?? false,
             isVisible: dto.isVisible ?? true,
         });
 
         const saved = await this.elementRepository.save(element);
-        await this.touchStrategy(dto.strategyId);
+
+        // 5. Update timestamp strategy
+        await this.strategyRepository.update(dto.strategyId, {
+            lastEditedAt: new Date(),
+        });
 
         this.logger.log(`Created element ${saved.id} (${saved.type}) in strategy ${dto.strategyId}`, context);
-        return plainToInstance(ElementResponseDto, saved, { excludeExtraneousValues: true });
+        return plainToInstance(ElementResponseDto, saved, {
+            excludeExtraneousValues: true,
+        });
     }
 
     // ── PRIVATE HELPERS ────────────────────────────────────────────────────────
@@ -70,11 +89,6 @@ export class ElementsService {
         const el = await this.elementRepository.findOne({ where: { id } });
         if (!el) throw new NotFoundException(`Element with id ${id} not found`);
         return el;
-    }
-
-    private validateEdgeContentData(cd?: Record<string, unknown>): void {
-        if (!cd?.sourceId || !cd?.targetId)
-            throw new BadRequestException('EDGE elements require contentData.sourceId and contentData.targetId');
     }
 
     private async validateEdgeEndpoints(strategyId: string, sourceId: string, targetId: string): Promise<void> {
@@ -113,15 +127,6 @@ export class ElementsService {
         return [...childIds, ...deeper.flat()];
     }
 
-    private async deleteEdgesForNodes(nodeIds: string[], repo: Repository<ElementEntity>): Promise<void> {
-        const allEdges = await repo.find({ where: { type: ElementType.EDGE } });
-        const edgesToDelete = allEdges.filter(e => {
-            const cd = e.contentData as { sourceId?: string; targetId?: string } | null;
-            return cd && (nodeIds.includes(cd.sourceId ?? '') || nodeIds.includes(cd.targetId ?? ''));
-        });
-        if (edgesToDelete.length) await repo.delete(edgesToDelete.map(e => e.id));
-    }
-
     private applyBulkItem(element: ElementEntity, item: BulkUpdateItemDto): void {
         if (item.x !== undefined) element.x = item.x;
         if (item.y !== undefined) element.y = item.y;
@@ -130,11 +135,10 @@ export class ElementsService {
         if (item.zIndex !== undefined) element.zIndex = item.zIndex;
         if (item.isLocked !== undefined) element.isLocked = item.isLocked;
         if (item.isVisible !== undefined) element.isVisible = item.isVisible;
-        if (item.styleData !== undefined) element.styleData = { ...(element.styleData ?? {}), ...item.styleData };
-        if (item.contentData !== undefined)
-            element.contentData = { ...(element.contentData ?? {}), ...item.contentData };
-        if (Object.prototype.hasOwnProperty.call(item, 'parentElementId'))
+
+        if (Object.prototype.hasOwnProperty.call(item, 'parentElementId')) {
             element.parentElementId = item.parentElementId ?? null;
+        }
     }
 
     private async touchStrategy(strategyId: string): Promise<void> {

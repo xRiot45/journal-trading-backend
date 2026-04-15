@@ -15,6 +15,9 @@ export class ElementEntity extends BaseEntity {
     @Column({ type: 'enum', enum: ElementType })
     type: ElementType;
 
+    @Column({ name: 'identifier', type: 'varchar', nullable: false, comment: 'Judul dari node' })
+    identifier: string;
+
     @Column({ type: 'float', default: 0 })
     x: number;
 
@@ -29,12 +32,6 @@ export class ElementEntity extends BaseEntity {
 
     @Column({ name: 'zIndex', type: 'int', default: 0 })
     zIndex: number;
-
-    @Column({ name: 'styleData', type: 'json', nullable: true })
-    styleData: Record<string, unknown> | null;
-
-    @Column({ name: 'contentData', type: 'json', nullable: true })
-    contentData: Record<string, unknown> | null;
 
     @Column({ name: 'parentElementId', nullable: true })
     parentElementId: string | null;
