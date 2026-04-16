@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ElementsService } from './elements.service';
 import { ApiDocGenericResponse } from 'src/common/decorators/api-doc.decorator';
 import { CreateElementDto } from './dto/req/create-element.dto';
@@ -46,8 +46,18 @@ export class ElementsController {
         response: [ElementResponseDto],
         status: HttpStatus.OK,
         produces: 'application/json',
+        params: [
+            {
+                name: 'strategyId',
+                description: 'ID of the strategy to retrieve elements for',
+                required: true,
+                type: 'string',
+            },
+        ],
     })
-    async getElementsByStrategy(strategyId: string): Promise<BaseResponseDto<ElementResponseDto[]>> {
+    async getElementsByStrategy(
+        @Param('strategyId') strategyId: string,
+    ): Promise<BaseResponseDto<ElementResponseDto[]>> {
         const result = await this.elementsService.getElementsByStrategy(strategyId);
         return {
             success: true,
