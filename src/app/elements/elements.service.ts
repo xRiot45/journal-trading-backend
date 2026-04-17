@@ -8,7 +8,7 @@ import { LoggerService } from 'src/core/logger/logger.service';
 import { UpsertElementDto } from './dto/req/create-element.dto';
 import { ElementResponseDto } from './dto/res/element-response.dto';
 import { BulkUpdateItemDto } from './dto/req/update-element.dto';
-import { HistoryActionType } from '../strategies/entities/canvas-history.entity';
+import { CanvasHistoryEntity, HistoryActionType } from '../strategies/entities/canvas-history.entity';
 import { plainToInstance } from 'class-transformer';
 
 @Injectable()
@@ -18,6 +18,8 @@ export class ElementsService {
         private readonly elementRepository: Repository<ElementEntity>,
         @InjectRepository(StrategyEntity)
         private readonly strategyRepository: Repository<StrategyEntity>,
+        @InjectRepository(CanvasHistoryEntity)
+        private readonly historyRepository: Repository<CanvasHistoryEntity>,
         private readonly strategiesService: StrategiesService,
         private readonly dataSource: DataSource,
         private readonly logger: LoggerService,
@@ -154,6 +156,10 @@ export class ElementsService {
         const context = `${ElementsService.name}.upsertElement`;
         const { id, strategyId, parentElementId } = dto;
 
+        if (!strategyId) {
+            throw new BadRequestException('strategyId is required');
+        }
+
         // 1. Validasi Strategy (Canvas)
         const strategy = await this.strategyRepository.findOne({ where: { id: strategyId } });
         if (!strategy) {
@@ -171,22 +177,12 @@ export class ElementsService {
 
         let element: ElementEntity | null;
 
+        // --- LOGIKA UTAMA (CREATE ATAU UPDATE) ---
         if (id) {
-            // --- LOGIKA UPDATE ---
             element = await this.elementRepository.findOne({ where: { id, strategyId } });
             if (!element) throw new NotFoundException(`Element with id ${id} not found in this strategy`);
-
-            // Merge data lama dengan data baru dari DTO
             this.elementRepository.merge(element, dto);
         } else {
-            // --- LOGIKA CREATE ---
-            // Simpan snapshot hanya saat create (atau sesuai kebijakan bisnis Anda)
-            await this.strategiesService.pushSnapshot(
-                strategyId,
-                HistoryActionType.CREATE_ELEMENT,
-                `Create element: ${dto.identifier}`,
-            );
-
             element = this.elementRepository.create({
                 ...dto,
                 x: dto.x ?? 0,
@@ -196,13 +192,39 @@ export class ElementsService {
             });
         }
 
-        // 3. Save (TypeORM akan otomatis handle Insert atau Update berdasarkan keberadaan ID)
+        // Simpan Elemen ke Database
         const saved = await this.elementRepository.save(element);
 
-        // 4. Update timestamp strategy
+        // --- INLINE LOGIC PUSH SNAPSHOT ---
+        // A. Ambil semua elemen terbaru di canvas ini untuk dijadikan snapshot data
+        const currentElements = await this.elementRepository.find({
+            where: { strategyId: strategyId },
+        });
+
+        // B. Cari index stack berikutnya (Logic getNextStackIndex)
+        const lastHistory = await this.historyRepository.findOne({
+            where: { strategyId: strategyId },
+            order: { stackIndex: 'DESC' },
+        });
+        const nextIndex = lastHistory ? lastHistory.stackIndex + 1 : 0;
+
+        // C. Simpan Snapshot Data (Logic pushSnapshotWithData)
+        const historyLabel = id ? `Update element: ${saved.identifier}` : `Create element: ${saved.identifier}`;
+        const actionType = id ? HistoryActionType.UPDATE_ELEMENT : HistoryActionType.CREATE_ELEMENT;
+
+        await this.historyRepository.save({
+            strategyId: strategyId,
+            actionType: actionType,
+            label: historyLabel,
+            snapshot: JSON.stringify(currentElements), // Simpan seluruh state canvas
+            stackIndex: nextIndex,
+            createdAt: new Date(),
+        });
+
+        // --- UPDATE STRATEGY TIMESTAMP ---
         await this.strategyRepository.update(strategyId, { lastEditedAt: new Date() });
 
-        this.logger.log(`${id ? 'Updated' : 'Created'} element ${saved.id}`, context);
+        this.logger.log(`${id ? 'Updated' : 'Created'} element ${saved.id} and pushed snapshot`, context);
 
         return plainToInstance(ElementResponseDto, saved, {
             excludeExtraneousValues: true,
