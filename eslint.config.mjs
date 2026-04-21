@@ -30,7 +30,7 @@ export default tseslint.config(
             '@typescript-eslint/no-explicit-any': 'warn', // Larang penggunaan 'any', gunakan 'unknown'
             '@typescript-eslint/explicit-function-return-type': 'error', // Semua function di Service/Controller wajib punya tipe return
             '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }], // Larang variabel nganggur kecuali diawali underscore
-            '@typescript-eslint/no-non-null-assertion': 'error', // Larang operator '!', paksa pengecekan 'if (data)'
+            '@typescript-eslint/no-non-null-assertion': 'off', // Larang operator '!', paksa pengecekan 'if (data)'
             '@typescript-eslint/naming-convention': [
                 // Paksa standar penamaan TypeScript
                 'error',

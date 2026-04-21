@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
 import { ElementType } from '../../entities/element.entity';
 
-export class CreateElementDto {
+export class ElementBaseDto {
     @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Canvas (strategy) ID' })
     @IsUUID()
     @IsNotEmpty()
@@ -58,7 +58,7 @@ export class CreateElementDto {
     isVisible?: boolean;
 }
 
-export class UpsertElementDto extends PartialType(CreateElementDto) {
+export class UpsertElementDto extends PartialType(ElementBaseDto) {
     @ApiPropertyOptional({
         example: '550e8400-e29b-41d4-a716-446655440000',
         description: 'ID elemen. Jika diisi maka Update, jika kosong maka Create.',

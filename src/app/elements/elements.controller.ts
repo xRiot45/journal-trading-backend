@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Put, UseGuards } from '@nestjs/common';
 import { ElementsService } from './elements.service';
 import { ApiDocGenericResponse } from 'src/common/decorators/api-doc.decorator';
-import { UpsertElementDto } from './dto/req/create-element.dto';
+import { UpsertElementDto } from './dto/req/element.dto';
 import { ElementResponseDto } from './dto/res/element-response.dto';
 import { BaseResponseDto } from 'src/shared/dto/base-response.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -44,27 +44,6 @@ export class ElementsController {
         };
     }
 
-    @Put()
-    @HttpCode(HttpStatus.OK)
-    @ApiDocGenericResponse({
-        summary: 'Upsert element (Create or Update)',
-        description: 'If ID is provided, it updates. If not, it creates a new element.',
-        auth: true,
-        body: UpsertElementDto,
-        response: ElementResponseDto,
-        status: HttpStatus.OK,
-    })
-    async upsertElement(@Body() dto: UpsertElementDto): Promise<BaseResponseDto<ElementResponseDto>> {
-        const result = await this.elementsService.upsertElement(dto);
-        return {
-            success: true,
-            statusCode: HttpStatus.OK,
-            timestamp: new Date(),
-            message: dto.id ? 'Element updated successfully' : 'Element created successfully',
-            data: result,
-        };
-    }
-
     @Put('node')
     @HttpCode(HttpStatus.OK)
     @ApiDocGenericResponse({
@@ -78,21 +57,11 @@ export class ElementsController {
     })
     async upsertNode(@Body() dto: UpsertElementDto): Promise<BaseResponseDto<ElementResponseDto>> {
         const result = await this.elementsService.upsertNode(dto);
-        let message = 'Node created successfully';
-
-        if (dto.id) {
-            if (dto.parentElementId !== undefined) {
-                message = 'Node updated or moved successfully';
-            } else {
-                message = 'Node updated successfully';
-            }
-        }
-
         return {
             success: true,
             statusCode: HttpStatus.OK,
             timestamp: new Date(),
-            message,
+            message: 'Node Upserted Successfully!',
             data: result,
         };
     }

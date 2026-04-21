@@ -43,7 +43,7 @@ export class ElementEntity extends BaseEntity {
     isVisible: boolean;
 
     /**
-     * [BONUS] depth — level kedalaman node dalam tree.
+     * level kedalaman node dalam tree.
      * Root = 0, child langsung = 1, dst.
      * Berguna untuk: limit max depth, styling per level di frontend,
      * atau query "semua node di level 2".
@@ -52,7 +52,7 @@ export class ElementEntity extends BaseEntity {
     depth: number;
 
     /**
-     * [BONUS] path — materialized path berupa string ID dipisah "/".
+     * materialized path berupa string ID dipisah "/".
      * Contoh: "uuid-root/uuid-child/uuid-grandchild"
      * Berguna untuk:
      *   - Query semua descendant: WHERE path LIKE 'uuid-root/%'
