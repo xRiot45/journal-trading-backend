@@ -50,18 +50,49 @@ export class ElementsController {
         summary: 'Upsert element (Create or Update)',
         description: 'If ID is provided, it updates. If not, it creates a new element.',
         auth: true,
-        body: UpsertElementDto, // Gunakan DTO gabungan
+        body: UpsertElementDto,
         response: ElementResponseDto,
         status: HttpStatus.OK,
     })
-    async upsert(@Body() dto: UpsertElementDto): Promise<BaseResponseDto<ElementResponseDto>> {
+    async upsertElement(@Body() dto: UpsertElementDto): Promise<BaseResponseDto<ElementResponseDto>> {
         const result = await this.elementsService.upsertElement(dto);
-
         return {
             success: true,
             statusCode: HttpStatus.OK,
             timestamp: new Date(),
             message: dto.id ? 'Element updated successfully' : 'Element created successfully',
+            data: result,
+        };
+    }
+
+    @Put('node')
+    @HttpCode(HttpStatus.OK)
+    @ApiDocGenericResponse({
+        summary: 'Upsert node (Create / Update / Move)',
+        description:
+            'Create new node if ID is not provided. Update node properties or move node (change parent) if ID is provided.',
+        auth: true,
+        body: UpsertElementDto,
+        response: ElementResponseDto,
+        status: HttpStatus.OK,
+    })
+    async upsertNode(@Body() dto: UpsertElementDto): Promise<BaseResponseDto<ElementResponseDto>> {
+        const result = await this.elementsService.upsertNode(dto);
+        let message = 'Node created successfully';
+
+        if (dto.id) {
+            if (dto.parentElementId !== undefined) {
+                message = 'Node updated or moved successfully';
+            } else {
+                message = 'Node updated successfully';
+            }
+        }
+
+        return {
+            success: true,
+            statusCode: HttpStatus.OK,
+            timestamp: new Date(),
+            message,
             data: result,
         };
     }

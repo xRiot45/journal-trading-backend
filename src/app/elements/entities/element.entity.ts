@@ -42,6 +42,26 @@ export class ElementEntity extends BaseEntity {
     @Column({ name: 'isVisible', default: true })
     isVisible: boolean;
 
+    /**
+     * [BONUS] depth — level kedalaman node dalam tree.
+     * Root = 0, child langsung = 1, dst.
+     * Berguna untuk: limit max depth, styling per level di frontend,
+     * atau query "semua node di level 2".
+     */
+    @Column({ name: 'depth', type: 'int', default: 0 })
+    depth: number;
+
+    /**
+     * [BONUS] path — materialized path berupa string ID dipisah "/".
+     * Contoh: "uuid-root/uuid-child/uuid-grandchild"
+     * Berguna untuk:
+     *   - Query semua descendant: WHERE path LIKE 'uuid-root/%'
+     *   - Cek apakah node B adalah ancestor dari A: A.path.includes(B.id)
+     *   - Hindari circular reference saat move node
+     */
+    @Column({ name: 'path', type: 'text', nullable: true })
+    path: string | null;
+
     // ---- Relations ----
 
     @ManyToOne(() => StrategyEntity, d => d.elements, { onDelete: 'CASCADE' })

@@ -2,6 +2,30 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { ElementType } from '../../entities/element.entity';
 
+/**
+ * TreeNode — tipe rekursif untuk representasi tree JSON.
+ * Digunakan sebagai return type dari getTree().
+ */
+export type TreeNode = {
+    id: string;
+    strategyId: string;
+    identifier: string;
+    type: ElementType;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    zIndex: number;
+    depth: number;
+    path: string | null;
+    parentElementId: string | null;
+    isLocked: boolean;
+    isVisible: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    children: TreeNode[];
+};
+
 export class ElementResponseDto {
     @ApiProperty()
     @Expose()
@@ -39,6 +63,14 @@ export class ElementResponseDto {
     @Expose()
     zIndex: number;
 
+    @ApiProperty({ description: 'Depth level: 0 = root, 1 = child, dst.' })
+    @Expose()
+    depth: number;
+
+    @ApiPropertyOptional({ nullable: true })
+    @Expose()
+    path: string | null;
+
     @ApiPropertyOptional({ nullable: true })
     @Expose()
     parentElementId: string | null;
@@ -65,21 +97,29 @@ export class ElementResponseDto {
     updatedAt: Date;
 }
 
-export class CanvasResponseDto {
-    @ApiProperty({ description: 'Strategy (canvas) ID' })
-    strategyId: string;
+export class TreeResponseDto {
+    @ApiProperty({ description: 'Daftar root node beserta seluruh subtree-nya' })
+    roots: TreeNode[];
 
-    @ApiProperty({ type: [ElementResponseDto] })
-    elements: ElementResponseDto[];
-
-    @ApiProperty({ example: 42 })
+    @ApiProperty({ description: 'Total seluruh node dalam strategy' })
     total: number;
 }
 
-export class BulkUpdateResultDto {
-    @ApiProperty({ example: 5 })
-    updated: number;
+// export class CanvasResponseDto {
+//     @ApiProperty({ description: 'Strategy (canvas) ID' })
+//     strategyId: string;
 
-    @ApiProperty({ type: [ElementResponseDto] })
-    elements: ElementResponseDto[];
-}
+//     @ApiProperty({ type: [ElementResponseDto] })
+//     elements: ElementResponseDto[];
+
+//     @ApiProperty({ example: 42 })
+//     total: number;
+// }
+
+// export class BulkUpdateResultDto {
+//     @ApiProperty({ example: 5 })
+//     updated: number;
+
+//     @ApiProperty({ type: [ElementResponseDto] })
+//     elements: ElementResponseDto[];
+// }
