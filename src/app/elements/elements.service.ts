@@ -214,4 +214,23 @@ export class ElementsService {
         // ─── 6. RETURN FORMATTED RESPONSE ───────────────────────────────────
         return mapToDto(ElementResponseDto, savedNode);
     }
+
+    async removeElement(elementId: string): Promise<void> {
+        const context = `${ElementsService.name}.removeElement`;
+
+        try {
+            const existingElement = await this.elementRepository.findOneBy({
+                id: elementId,
+            });
+
+            if (!existingElement) throw new NotFoundException(`Element with id ${elementId} not found`);
+
+            await this.elementRepository.remove(existingElement);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorStack = error instanceof Error ? error.stack : undefined;
+            this.logger.error(`Error deleting element: ${errorMessage}`, context, errorStack);
+            throw error;
+        }
+    }
 }
